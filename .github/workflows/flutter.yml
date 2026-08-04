@@ -1,0 +1,133 @@
+name: Flutter CI/CD
+
+ 
+
+# Controls when the workflow will run
+
+on:
+
+  push:
+
+    branches: [ main, master, develop ]
+
+  pull_request:
+
+    branches: [ main, master, develop ]
+
+ 
+
+  # Allows you to run this workflow manually from the Actions tab
+
+  workflow_dispatch:
+
+ 
+
+jobs:
+
+  build:
+
+    # Runs on the latest Ubuntu runner
+
+    runs-on: ubuntu-latest
+
+ 
+
+    steps:
+
+      # Step 1: Check out the repository code
+
+      - name: Checkout repository
+
+        uses: actions/checkout@v4
+
+ 
+
+      # Step 2: Set up the Java Development Kit (required for Android builds)
+
+      - name: Set up JDK
+
+        uses: actions/setup-java@v4
+
+        with:
+
+          distribution: 'zulu'
+
+          java-version: '17'
+
+ 
+
+      # Step 3: Set up Flutter environment using the official community action
+
+      - name: Set up Flutter
+
+        uses: subosito/flutter-action@v2
+
+        with:
+
+          channel: 'stable'
+
+          # Optional: Specify a version, or omit to always use the latest stable
+
+          # flutter-version: '3.22.0' 
+
+ 
+
+      # Step 4: Print Flutter version info for debugging
+
+      - name: Check Flutter version
+
+        run: flutter --version
+
+ 
+
+      # Step 5: Install project dependencies (pub get)
+
+      - name: Install dependencies
+
+        run: flutter pub get
+
+ 
+
+      # Step 6: Verify formatting (Fails if code isn't formatted properly)
+
+      - name: Check formatting
+
+        run: flutter format --set-exit-if-changed .
+
+ 
+
+      # Step 7: Analyze the code for syntax issues or warnings
+
+      - name: Analyze code
+
+        run: flutter analyze
+
+ 
+
+      # Step 8: Run your automated unit/widget tests
+
+      - name: Run tests
+
+        run: flutter test
+
+ 
+
+      # Step 9: Build the release APK (Android application package)
+
+      - name: Build APK
+
+        run: flutter build apk --release
+
+ 
+
+      # Step 10: Upload the generated APK so you can download it from GitHub
+
+      - name: Upload Build Artifact
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: release-apk
+
+          path: build/app/outputs/flutter-apk/app-release.apk
